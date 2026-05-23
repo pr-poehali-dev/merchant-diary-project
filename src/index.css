@@ -80,22 +80,7 @@
 }
 
 .book-spread::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  transform: translateX(-50%);
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--spine) 8%,
-    var(--page-edge) 50%,
-    var(--spine) 92%,
-    transparent 100%
-  );
-  opacity: 0.35;
+  display: none;
 }
 
 .book-spread::after {
