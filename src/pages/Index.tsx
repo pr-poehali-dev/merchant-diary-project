@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 const ILLUSTRATION_URL =
-  "https://cdn.poehali.dev/projects/820a5daf-3fdd-4d4c-ab92-5ca9de5d87ba/files/839cead4-5e34-4ffc-a58a-404285263076.jpg";
+  "https://cdn.poehali.dev/projects/820a5daf-3fdd-4d4c-ab92-5ca9de5d87ba/files/731c6af2-3c06-4faa-81e9-546e3be8d177.jpg";
 
 interface DiaryEntry {
   date: string;
@@ -152,29 +152,27 @@ const WELCOME: DiaryEntry = {
   text: "Предъ вами — страницы изъ личнаго дневника московскаго купца второй гильдіи Николая Ивановича Прохорова, 1895 года отъ Рождества Христова. Записки сіи велись имъ собственноручно, безъ умысла на публикацію, и потому содержатъ искреннее свидѣтельство о нравахъ, торговлѣ и семейномъ быту того времени. Нажмите кнопку ниже, дабы перелистнуть страницу дневника.",
 };
 
+// Записи начинаются с мая и идут строго по порядку
+const MAY_START_INDEX = ENTRIES.findIndex((e) => e.date.includes("мая"));
+
 export default function Index() {
+  const currentIndexRef = useRef<number>(MAY_START_INDEX);
   const [entry, setEntry] = useState<DiaryEntry>(WELCOME);
   const [pageNum, setPageNum] = useState(0);
   const [isTurning, setIsTurning] = useState(false);
   const [isAppearing, setIsAppearing] = useState(false);
-  const usedIndices = useRef<Set<number>>(new Set());
 
   const handleFlip = () => {
     if (isTurning) return;
     setIsTurning(true);
 
     setTimeout(() => {
-      if (usedIndices.current.size >= ENTRIES.length) {
-        usedIndices.current.clear();
-      }
-      let idx: number;
-      do {
-        idx = Math.floor(Math.random() * ENTRIES.length);
-      } while (usedIndices.current.has(idx));
-      usedIndices.current.add(idx);
-
+      const idx = currentIndexRef.current;
       setEntry(ENTRIES[idx]);
       setPageNum((n) => n + 1);
+      // следующая запись, с возвратом в начало (май) после конца
+      currentIndexRef.current =
+        idx + 1 >= ENTRIES.length ? MAY_START_INDEX : idx + 1;
       setIsTurning(false);
       setIsAppearing(true);
       setTimeout(() => setIsAppearing(false), 600);
