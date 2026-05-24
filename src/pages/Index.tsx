@@ -152,11 +152,8 @@ const WELCOME: DiaryEntry = {
   text: "Предъ вами — страницы изъ личнаго дневника московскаго купца второй гильдіи Николая Ивановича Прохорова, 1895 года отъ Рождества Христова. Записки сіи велись имъ собственноручно, безъ умысла на публикацію, и потому содержатъ искреннее свидѣтельство о нравахъ, торговлѣ и семейномъ быту того времени. Нажмите кнопку ниже, дабы перелистнуть страницу дневника.",
 };
 
-// Записи начинаются с мая и идут строго по порядку
-const MAY_START_INDEX = ENTRIES.findIndex((e) => e.date.includes("мая"));
-
 export default function Index() {
-  const currentIndexRef = useRef<number>(MAY_START_INDEX);
+  const currentIndexRef = useRef<number>(0);
   const [entry, setEntry] = useState<DiaryEntry>(WELCOME);
   const [pageNum, setPageNum] = useState(0);
   const [isTurning, setIsTurning] = useState(false);
@@ -164,15 +161,14 @@ export default function Index() {
 
   const handleFlip = () => {
     if (isTurning) return;
+    if (currentIndexRef.current >= ENTRIES.length) return;
     setIsTurning(true);
 
     setTimeout(() => {
       const idx = currentIndexRef.current;
       setEntry(ENTRIES[idx]);
-      setPageNum((n) => n + 1);
-      // следующая запись, с возвратом в начало (май) после конца
-      currentIndexRef.current =
-        idx + 1 >= ENTRIES.length ? MAY_START_INDEX : idx + 1;
+      setPageNum(idx + 1);
+      currentIndexRef.current = idx + 1;
       setIsTurning(false);
       setIsAppearing(true);
       setTimeout(() => setIsAppearing(false), 600);
@@ -324,8 +320,13 @@ export default function Index() {
 
       {/* Кнопка */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem", marginBottom: "3rem" }}>
-        <button className="btn-retro" onClick={handleFlip} disabled={isTurning}>
-          Перелистнуть страницу дневника
+        <button
+          className="btn-retro"
+          onClick={handleFlip}
+          disabled={isTurning || pageNum >= ENTRIES.length}
+          style={{ opacity: pageNum >= ENTRIES.length ? 0.45 : 1, cursor: pageNum >= ENTRIES.length ? "default" : "pointer" }}
+        >
+          {pageNum >= ENTRIES.length ? "Дневникъ окончёнъ" : "Перелистнуть страницу дневника"}
         </button>
         <p className="page-number" style={{ letterSpacing: "0.12em" }}>
           {ENTRIES.length} записей &nbsp;&middot;&nbsp; съ января по декабрь 1895 г.
